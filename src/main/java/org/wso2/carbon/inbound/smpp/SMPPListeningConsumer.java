@@ -254,44 +254,6 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     }
 
     /**
-     * This class will receive the notification from {@link SMPPSession} for the
-     * state changes. It will schedule to re-initialize session.
-     */
-    private class SessionStateListenerImpl implements SessionStateListener {
-        @Override
-        public void onStateChange(SessionState sessionState, SessionState sessionState1, Object o) {
-            if (sessionState.equals(SessionState.CLOSED)) {
-                logger.info("Session closed for " + name);
-                reconnectAfter(reconnectInterval);
-            }
-        }
-    }
-
-    /**
-     * This class will receive the notification when the SMPP message is received.
-     * Then get the messages and inject into the sequence.
-     */
-    private class MessageReceiverListenerImpl implements MessageReceiverListener {
-        public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
-            // inject short message into the sequence.
-            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstant.CONTENT_TYPE);
-        }
-
-        public void onAcceptAlertNotification(AlertNotification alertNotification) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("onAcceptAlertNotification");
-            }
-        }
-
-        public DataSmResult onAcceptDataSm(DataSm dataSm, Session source) throws ProcessRequestException {
-            if (logger.isDebugEnabled()) {
-                logger.debug("onAcceptDataSm");
-            }
-            return null;
-        }
-    }
-
-    /**
      * Reconnect session after specified interval.
      *
      * @param timeInMillis is the interval.
@@ -309,7 +271,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
                     }
                 }
                 int attempt = 0;
-                if (retryCount < 0 ){
+                if (retryCount < 0) {
                     retryCount = Double.POSITIVE_INFINITY;
                 }
                 while ((session == null || session.getSessionState().equals(SessionState.CLOSED)) && attempt < retryCount) {
@@ -349,12 +311,50 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
             }
         }
         for (Thread thread : threadList) {
-            if(!thread.isInterrupted()){
+            if (!thread.isInterrupted()) {
                 thread.interrupt();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Thread " + thread.getName() +" successfully stopped for " + name);
+                    logger.debug("Thread " + thread.getName() + " successfully stopped for " + name);
                 }
             }
+        }
+    }
+
+    /**
+     * This class will receive the notification from {@link SMPPSession} for the
+     * state changes. It will schedule to re-initialize session.
+     */
+    private class SessionStateListenerImpl implements SessionStateListener {
+        @Override
+        public void onStateChange(SessionState sessionState, SessionState sessionState1, Object o) {
+            if (sessionState.equals(SessionState.CLOSED)) {
+                logger.info("Session closed for " + name);
+                reconnectAfter(reconnectInterval);
+            }
+        }
+    }
+
+    /**
+     * This class will receive the notification when the SMPP message is received.
+     * Then get the messages and inject into the sequence.
+     */
+    private class MessageReceiverListenerImpl implements MessageReceiverListener {
+        public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
+            // inject short message into the sequence.
+            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstant.CONTENT_TYPE);
+        }
+
+        public void onAcceptAlertNotification(AlertNotification alertNotification) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("onAcceptAlertNotification");
+            }
+        }
+
+        public DataSmResult onAcceptDataSm(DataSm dataSm, Session source) throws ProcessRequestException {
+            if (logger.isDebugEnabled()) {
+                logger.debug("onAcceptDataSm");
+            }
+            return null;
         }
     }
 }
