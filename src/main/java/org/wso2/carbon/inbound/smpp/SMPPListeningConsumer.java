@@ -125,61 +125,61 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
         if (logger.isDebugEnabled()) {
             logger.debug("Starting to load the SMPP Properties for " + name);
         }
-        this.host = properties.getProperty(SMPPConstant.HOST);
+        this.host = properties.getProperty(SMPPConstants.HOST);
         if (StringUtils.isEmpty(host)) {
             throw new SynapseException("IP address of the SMSC (Host) is not set");
         }
-        if (StringUtils.isEmpty(properties.getProperty(SMPPConstant.PORT))) {
+        if (StringUtils.isEmpty(properties.getProperty(SMPPConstants.PORT))) {
             throw new SynapseException("Port to access the " + host + " is not set");
         } else {
-            this.port = Integer.parseInt(properties.getProperty(SMPPConstant.PORT));
+            this.port = Integer.parseInt(properties.getProperty(SMPPConstants.PORT));
         }
-        this.systemId = properties.getProperty(SMPPConstant.SYSTEMID);
+        this.systemId = properties.getProperty(SMPPConstants.SYSTEM_ID);
         if (StringUtils.isEmpty(systemId)) {
             throw new SynapseException("System Id of the ESME is not set to connect with " + host);
         }
-        this.password = properties.getProperty(SMPPConstant.PASSWORD);
+        this.password = properties.getProperty(SMPPConstants.PASSWORD);
         if (StringUtils.isEmpty(password)) {
             throw new SynapseException("Password of the ESME is not set to connect with " + host);
         }
-        this.bindType = properties.getProperty(SMPPConstant.BINDTYPE);
+        this.bindType = properties.getProperty(SMPPConstants.BIND_TYPE);
         if (StringUtils.isEmpty(bindType)) {
             throw new SynapseException("Bind Type of the ESME is not set to connect with " + host);
         }
-        this.addressTon = properties.getProperty(SMPPConstant.ADDRESSTON);
+        this.addressTon = properties.getProperty(SMPPConstants.ADDRESS_TON);
         if (StringUtils.isEmpty(addressTon)) {
             throw new SynapseException("Address TON value of the ESME is not set to connect with " + host);
         }
-        this.addressNpi = properties.getProperty(SMPPConstant.ADDRESSNPI);
+        this.addressNpi = properties.getProperty(SMPPConstants.ADDRESS_NPI);
         if (StringUtils.isEmpty(addressNpi)) {
             throw new SynapseException("Address NPI valueof the ESME is not set to connect with " + host);
         }
-        this.systemType = properties.getProperty(SMPPConstant.SYSTEMTYPE);
+        this.systemType = properties.getProperty(SMPPConstants.SYSTEM_TYPE);
         if (StringUtils.isEmpty(systemType)) {
-            this.systemType = SMPPConstant.NULL;
+            this.systemType = SMPPConstants.NULL;
         }
-        this.addressRange = properties.getProperty(SMPPConstant.ADDRESSRANGE);
+        this.addressRange = properties.getProperty(SMPPConstants.ADDRESS_RANGE);
         if (StringUtils.isEmpty(addressRange)) {
-            this.addressRange = SMPPConstant.NULL;
+            this.addressRange = SMPPConstants.NULL;
         }
-        String enquireLinktimer = properties.getProperty(SMPPConstant.ENQUIRELINK_TIMER);
+        String enquireLinktimer = properties.getProperty(SMPPConstants.ENQUIRE_LINK_TIMER);
         if (StringUtils.isEmpty(enquireLinktimer)) {
-            enquireLinktimer = SMPPConstant.ENQUIRELINK_TIMER_DEFAULT;
+            enquireLinktimer = SMPPConstants.ENQUIRELINK_TIMER_DEFAULT;
         }
         enquireLinkTimer = Integer.parseInt(enquireLinktimer);
-        String transactiontimer = properties.getProperty(SMPPConstant.TRANSACTION_TIMER);
+        String transactiontimer = properties.getProperty(SMPPConstants.TRANSACTION_TIMER);
         if (StringUtils.isEmpty(transactiontimer)) {
-            transactiontimer = SMPPConstant.TRANSACTION_TIMER_DEFAULT;
+            transactiontimer = SMPPConstants.TRANSACTION_TIMER_DEFAULT;
         }
         transactionTimer = Integer.parseInt(transactiontimer);
-        String reconnectinterval = properties.getProperty(SMPPConstant.RECONNECT_INTERVAL);
+        String reconnectinterval = properties.getProperty(SMPPConstants.RECONNECT_INTERVAL);
         if (StringUtils.isEmpty(reconnectinterval)) {
-            reconnectinterval = SMPPConstant.RECONNECT_INTERVAL_DEFAULT;
+            reconnectinterval = SMPPConstants.RECONNECT_INTERVAL_DEFAULT;
         }
         this.reconnectInterval = Long.parseLong(reconnectinterval);
-        String retrycount = properties.getProperty(SMPPConstant.RETRY_COUNT);
+        String retrycount = properties.getProperty(SMPPConstants.RETRY_COUNT);
         if (StringUtils.isEmpty(retrycount)) {
-            retrycount = SMPPConstant.RETRY_COUNT_DEFAULT;
+            retrycount = SMPPConstants.RETRY_COUNT_DEFAULT;
         }
         this.retryCount = Integer.parseInt(retrycount);
         if (logger.isDebugEnabled()) {
@@ -341,7 +341,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     private class MessageReceiverListenerImpl implements MessageReceiverListener {
         public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
             // inject short message into the sequence.
-            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstant.CONTENT_TYPE);
+            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstants.CONTENT_TYPE);
         }
 
         public void onAcceptAlertNotification(AlertNotification alertNotification) {

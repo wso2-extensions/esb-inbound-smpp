@@ -23,19 +23,19 @@ package org.wso2.carbon.inbound.smpp;
  *
  * @since 1.0.0.
  */
-public class SMPPConstant {
+public class SMPPConstants {
     public static final String HOST = "host";
     public static final String PORT = "port";
-    public static final String SYSTEMID = "systemId";
+    public static final String SYSTEM_ID = "systemId";
     public static final String PASSWORD = "password";
-    public static final String SYSTEMTYPE = "systemType";
-    public static final String ADDRESSTON = "addressTon";
-    public static final String ADDRESSNPI = "addressNpi";
+    public static final String SYSTEM_TYPE = "systemType";
+    public static final String ADDRESS_TON = "addressTon";
+    public static final String ADDRESS_NPI = "addressNpi";
     public static final String NULL = "null";
-    public static final String BINDTYPE = "bindType";
-    public static final String ADDRESSRANGE ="addressRange";
+    public static final String BIND_TYPE = "bindType";
+    public static final String ADDRESS_RANGE ="addressRange";
     public static final String CONTENT_TYPE = "text/plain";
-    public static final String ENQUIRELINK_TIMER = "enquireLinkTimer";
+    public static final String ENQUIRE_LINK_TIMER = "enquireLinkTimer";
     public static final String ENQUIRELINK_TIMER_DEFAULT = "10000";
     public static final String TRANSACTION_TIMER = "transactionTimer";
     public static final String TRANSACTION_TIMER_DEFAULT = "200";
