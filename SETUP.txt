@@ -1,0 +1,57 @@
+Pre-requisites:
+
+ - Maven 3.x
+ - Java 1.7
+ - The org.wso2.esb.integration.integration-base project is required. The test suite has been configured to download this project automatically. If the automatic download fails, download the following project and compile it using the mvn clean install command to update your local repository:
+   https://github.com/wso2-extensions/esb-connector-integrationbase
+
+Tested Platform:
+
+ - UBUNTU 16.04
+ - WSO2 ESB 5.0.0
+
+ 
+Sample Inbound Configuration:
+
+<inboundEndpoint xmlns="http://ws.apache.org/ns/synapse" name="custom_listener" sequence="request" onError="fault"
+                     class="org.wso2.carbon.inbound.smpp.SMPPListeningConsumer" suspend="false">
+   <parameters>
+      <parameter name="sequential">true</parameter>
+      <parameter name="coordination">true</parameter>
+      <parameter name="port">2775</parameter>
+      <parameter name="host">localhost</parameter>
+      <parameter name="systemType">cp</parameter>
+      <parameter name="systemId">user1</parameter>
+      <parameter name="password">pass1</parameter>
+      <parameter name="addressNpi">UNKNOWN</parameter>
+      <parameter name="addressTon">UNKNOWN</parameter>
+      <parameter name="bindType">BIND_RX</parameter>
+      <parameter name="addressRange">null</parameter>
+      <parameter name="enquireLinktimer">3000</parameter>
+      <parameter name="transactiontimer">200</parameter>
+      <parameter name="reconnectInterval">2000</parameter>
+      <parameter name="retryCount">10</parameter>
+   </parameters>
+</inboundEndpoint>
+
+
+Navigate to "<INBOUND_HOME>" and run the following command.
+$ mvn clean install
+
+
+Send SMS From the SMSC simulator:
+  1. To work with SMSC simulator, download simulator from https://github.com/smn/logica-smpp-sim.
+
+  2. Go to SMSC Simulator directory, edit the users.txt file and add following name-value pairs to it.
+
+    name="your username"
+    password="your password"
+    timeout=unlimited
+
+  3. Start SMSC Simulator by executing the following command, "java -cp smpp.jar:smscsim.jar com.logica.smscsim.Simulator".
+
+  4. You will see a simulator screen. There,
+                 Enter 1 for the prompt to start simulation.
+                 Enter port number as you provided in the SMPP inbound configuration.
+                 You will see the “Starting listener... started.” log on the console.
+                 Then Enter 4 and type message to send SMS.
