@@ -33,14 +33,18 @@ public class SMPPConstants {
     public static final String ADDRESS_NPI = "addressNpi";
     public static final String NULL = "null";
     public static final String BIND_TYPE = "bindType";
-    public static final String ADDRESS_RANGE ="addressRange";
+    public static final String ADDRESS_RANGE = "addressRange";
     public static final String CONTENT_TYPE = "text/plain";
     public static final String ENQUIRE_LINK_TIMER = "enquireLinkTimer";
     public static final String ENQUIRELINK_TIMER_DEFAULT = "10000";
     public static final String TRANSACTION_TIMER = "transactionTimer";
     public static final String TRANSACTION_TIMER_DEFAULT = "200";
     public static final String RECONNECT_INTERVAL = "reconnectInterval";
-    public static final String RECONNECT_INTERVAL_DEFAULT = "5000";
+    public static final String RECONNECT_INTERVAL_DEFAULT = "1000";
     public static final String RETRY_COUNT = "retryCount";
-    public static final String RETRY_COUNT_DEFAULT = "5";
+    public static final String RETRY_COUNT_DEFAULT = "3";
+    public static final String EXPONENTIAL_FACTOR = "exponentialFactor";
+    public static final String EXPONENTIAL_FACTOR_DEFAULT = "5";
+    public static final String MAXIMUM_BACK_OFF_TIME = "maximumBackoffTime";
+    public static final String MAXIMUM_BACK_OFF_TIME_DEFAULT = "10000";
 }
