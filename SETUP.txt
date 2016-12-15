@@ -31,6 +31,8 @@ Sample Inbound Configuration:
       <parameter name="transactiontimer">200</parameter>
       <parameter name="reconnectInterval">2000</parameter>
       <parameter name="retryCount">10</parameter>
+      <parameter name="exponentialFactor">5</parameter>
+      <parameter name="maximumBackoffTime">10000</parameter>
    </parameters>
 </inboundEndpoint>
 

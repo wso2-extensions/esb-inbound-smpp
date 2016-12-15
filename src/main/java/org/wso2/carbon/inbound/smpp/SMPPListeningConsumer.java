@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.inbound.smpp;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.nurkiewicz.asyncretry.AsyncRetryExecutor;
+import com.nurkiewicz.asyncretry.RetryContext;
+import com.nurkiewicz.asyncretry.RetryExecutor;
+import com.nurkiewicz.asyncretry.function.RetryRunnable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,8 +45,10 @@ import org.jsmpp.session.SessionStateListener;
 import org.wso2.carbon.inbound.endpoint.protocol.generic.GenericEventBasedConsumer;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.ConnectException;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * SMPP inbound endpoint is used to listen and consume messages from SMSC via WSO2 ESB.
@@ -104,17 +111,31 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      */
     private int transactionTimer;
     /**
-     * The retry interval to reconnect with the SMSC.
+     * The Initial retry interval to reconnect with the SMSC.
      */
     private long reconnectInterval;
     /**
-     * The retry count while connection with the SMSC is closed.
+     * Start with Initial reconnectInterval delay until first retry attempt is made but if that one
+     * fails, we should wait (reconnectInterval * exponentialFactor) times more.
      */
-    private double retryCount;
+    private int exponentialFactor;
     /**
-     * Keep all the thread references that are created when the reconnection to SMSC is happened.
+     * The Maximum no of retries, while connection with the SMSC is closed.
      */
-    private ArrayList<Thread> threadList = new ArrayList<Thread>();
+    private int retryCount;
+    /**
+     * It increases the back off period for each retry attempt.
+     * When the interval has reached the max interval, it is no longer increased.
+     */
+    private long maximumBackoffTime;
+    /**
+     * It can schedule commands to run after a given delay, or to execute periodically.
+     */
+    private ScheduledExecutorService scheduler;
+    /**
+     * An object that executes submitted Runnable tasks.
+     */
+    private RetryExecutor executor;
 
     public SMPPListeningConsumer(Properties smppProperties, String name,
                                  SynapseEnvironment synapseEnvironment, String injectingSeq,
@@ -182,16 +203,32 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
             retrycount = SMPPConstants.RETRY_COUNT_DEFAULT;
         }
         this.retryCount = Integer.parseInt(retrycount);
+        if (retryCount < 0) {
+            retryCount = Integer.MAX_VALUE;
+        }
+        String exponentialfactor = properties.getProperty(SMPPConstants.EXPONENTIAL_FACTOR);
+        if (StringUtils.isEmpty(exponentialfactor)) {
+            exponentialfactor = SMPPConstants.EXPONENTIAL_FACTOR_DEFAULT;
+        }
+        this.exponentialFactor = Integer.parseInt(exponentialfactor);
+        String maximumBackofftime = properties.getProperty(SMPPConstants.MAXIMUM_BACK_OFF_TIME);
+        if (StringUtils.isEmpty(maximumBackofftime)) {
+            maximumBackofftime = SMPPConstants.MAXIMUM_BACK_OFF_TIME_DEFAULT;
+        }
+        this.maximumBackoffTime = Integer.parseInt(maximumBackofftime);
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded the SMPP Parameters with Host : " + host
                     + " , Port : " + port + " , SystemId : " + systemId
                     + " , Password : " + password + " , SystemType : "
                     + systemType + " , AddressTon : " + addressTon
+                    + " , BindType : " + bindType
                     + " , AddressNpi : " + addressNpi + ", AddressRange : "
                     + addressRange + ", EnquireLinkTimer : " + enquireLinkTimer
                     + ", TransactionTimer : " + transactionTimer
                     + ", ReconnectInterval : " + reconnectInterval
-                    + ", RetryCount : " + retryCount + "for " + name);
+                    + ", RetryCount : " + retryCount
+                    + ", ExponentialFactor : " + exponentialFactor
+                    + ", MaximumBackoffTime : " + maximumBackoffTime + "for " + name);
         }
         logger.info("Initialized the SMPP inbound consumer " + name);
     }
@@ -201,13 +238,21 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * according to the registered handler.
      */
     public void listen() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        executor = new AsyncRetryExecutor(scheduler).retryOn(ConnectException.class).
+                //(reconnectInterval) ms times exponentialFactor after each retry.
+                        withExponentialBackoff(reconnectInterval, exponentialFactor).
+                // Maximum backoff time.
+                        withMaxDelay(maximumBackoffTime).
+                        withUniformJitter().
+                        withMaxRetries(retryCount);
         if (logger.isDebugEnabled()) {
             logger.debug("Started to Listen SMPP messages for " + name);
         }
         try {
             session = getSession();
         } catch (IOException e) {
-            reconnectAfter(reconnectInterval);
+            reconnect();
             throw new SynapseException("Error while getting the SMPP session", e);
         }
     }
@@ -237,10 +282,11 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * @throws IOException if the creation of new session failed.
      */
     private SMPPSession newSession() throws IOException {
-        logger.info("Creating new session " + name);
+        logger.info("Trying to create new session " + name);
         bindParameter = new BindParameter(BindType.valueOf(bindType), systemId, password, systemType,
                 TypeOfNumber.valueOf(addressTon), NumberingPlanIndicator.valueOf(addressNpi), addressRange);
         SMPPSession session = new SMPPSession(host, port, bindParameter);
+        logger.info("Session created successfully");
         session.setEnquireLinkTimer(enquireLinkTimer);
         session.setTransactionTimer(transactionTimer);
         // Set listener to receive notification if there is any session state changes.
@@ -255,49 +301,14 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
 
     /**
      * Reconnect session after specified interval.
-     *
-     * @param timeInMillis is the interval.
      */
-    private void reconnectAfter(final long timeInMillis) {
-        new Thread() {
+    private void reconnect() {
+        final ListenableFuture future = executor.doWithRetry(new RetryRunnable() {
             @Override
-            public void run() {
-                logger.info("Schedule reconnect after " + timeInMillis + " millis for " + name);
-                try {
-                    Thread.sleep(timeInMillis);
-                } catch (InterruptedException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Unable to sleep the thread after " + timeInMillis + " millis for " + name);
-                    }
-                }
-                int attempt = 0;
-                if (retryCount < 0) {
-                    retryCount = Double.POSITIVE_INFINITY;
-                }
-                while ((session == null || session.getSessionState().equals(SessionState.CLOSED)) && attempt < retryCount) {
-                    try {
-                        attempt = ++attempt;
-                        logger.info("Reconnecting attempt #" + (attempt) + "... for " + name);
-                        session = newSession();
-                    } catch (IOException e) {
-                        logger.error("Failed opening connection and bind to " + host + ":"
-                                + port + " for " + name, e);
-                        // wait for a second
-                        try {
-                            Thread.sleep(timeInMillis);
-                        } catch (InterruptedException ee) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Unable to sleep the thread after " + timeInMillis + " millis for " + name);
-                            }
-                        }
-                    }
-                }
-                if (session == null || session.getSessionState().equals(SessionState.CLOSED)) {
-                    throw new SynapseException(name + " Could not connect to SMSC. Error while creating connection");
-                }
+            public void run(RetryContext retryContext) throws Exception {
+                newSession();
             }
-        }.start();
-        threadList.add(Thread.currentThread());
+        });
     }
 
     /**
@@ -310,12 +321,10 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
                 logger.debug("The SMPP connection has been shutdown ! for " + name);
             }
         }
-        for (Thread thread : threadList) {
-            if (!thread.isInterrupted()) {
-                thread.interrupt();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Thread " + thread.getName() + " successfully stopped for " + name);
-                }
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            if (logger.isDebugEnabled()) {
+                logger.debug("The Scheduler has been shutdown ! for " + name);
             }
         }
     }
@@ -329,7 +338,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
         public void onStateChange(SessionState sessionState, SessionState sessionState1, Object o) {
             if (sessionState.equals(SessionState.CLOSED)) {
                 logger.info("Session closed for " + name);
-                reconnectAfter(reconnectInterval);
+                reconnect();
             }
         }
     }
