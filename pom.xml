@@ -50,6 +50,35 @@ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
     </dependencies>
     <repositories>
         <repository>
+            <id>wso2-maven2-repository</id>
+            <url>http://dist.wso2.org/maven2</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>atlassian-contrib</id>
+            <url>https://maven.atlassian.com/contrib</url>
+        </repository>
+        <repository>
+            <id>atlassian-proxy</id>
+            <url>https://maven.atlassian.com/repository/public</url>
+        </repository>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://maven.atlassian.com/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
             <id>wso2</id>
             <name>WSO2 internal Repository</name>
             <url>http://dist.wso2.org/maven2/</url>
@@ -67,6 +96,28 @@ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
                 <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.releases</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
             </releases>
         </repository>
     </repositories>
