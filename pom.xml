@@ -190,13 +190,11 @@ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
-                            javax.xml.namespace; version=0.0.0,
-                            org.wso2.carbon.inbound.*; version="${carbon.mediation.version}",
-                            org.jsmpp.*,
-                            com.nurkiewicz.asyncretry.*,
-                            org.apache.synapse.*,
-                            org.apache.commons.*,
+                            javax.xml.namespace;
+                            version=0.0.0,
+                            *;resolution:=optional,
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
