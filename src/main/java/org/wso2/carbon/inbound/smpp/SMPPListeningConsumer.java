@@ -412,21 +412,21 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
         AutoCloseInputStream in = new AutoCloseInputStream(new ByteArrayInputStream(strMessage.getBytes()));
 
         try {
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Processed Custom inbound EP Message of Content-type : " + contentType + " for " + name);
             }
 
             org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) msgCtx).getAxis2MessageContext();
             Object builder;
-            if(StringUtils.isEmpty(contentType)) {
+            if (StringUtils.isEmpty(contentType)) {
                 logger.debug("No content type specified. Using SOAP builder for " + name);
                 builder = new SOAPBuilder();
             } else {
                 int index = contentType.indexOf(59);
-                String type = index > 0?contentType.substring(0, index):contentType;
+                String type = index > 0 ? contentType.substring(0, index) : contentType;
                 builder = BuilderUtil.getBuilderFromSelector(type, axis2MsgCtx);
-                if(builder == null) {
-                    if(logger.isDebugEnabled()) {
+                if (builder == null) {
+                    if (logger.isDebugEnabled()) {
                         logger.debug("No message builder found for type \'" + type + "\'. Falling back to SOAP." + name);
                     }
 
@@ -434,25 +434,25 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
                 }
             }
 
-            OMElement documentElement = ((Builder)builder).processDocument(in, contentType, axis2MsgCtx);
+            OMElement documentElement = ((Builder) builder).processDocument(in, contentType, axis2MsgCtx);
             msgCtx.setEnvelope(TransportUtils.createSOAPEnvelope(documentElement));
-            if(this.injectingSeq == null || "".equals(this.injectingSeq)) {
+            if (this.injectingSeq == null || "".equals(this.injectingSeq)) {
                 logger.error("Sequence name not specified. Sequence : " + this.injectingSeq);
                 return false;
             }
 
-            SequenceMediator seq = (SequenceMediator)this.synapseEnvironment.getSynapseConfiguration().getSequence(this.injectingSeq);
-            if(seq != null) {
-                if(logger.isDebugEnabled()) {
+            SequenceMediator seq = (SequenceMediator) this.synapseEnvironment.getSynapseConfiguration().getSequence(this.injectingSeq);
+            if (seq != null) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("injecting message to sequence : " + this.injectingSeq);
                 }
 
                 seq.setErrorHandler(this.onErrorSeq);
-                if(!seq.isInitialized()) {
+                if (!seq.isInitialized()) {
                     seq.init(this.synapseEnvironment);
                 }
 
-                if(!this.synapseEnvironment.injectInbound(msgCtx, seq, this.sequential)) {
+                if (!this.synapseEnvironment.injectInbound(msgCtx, seq, this.sequential)) {
                     return false;
                 }
             } else {
