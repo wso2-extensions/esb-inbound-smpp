@@ -23,11 +23,21 @@ import com.nurkiewicz.asyncretry.AsyncRetryExecutor;
 import com.nurkiewicz.asyncretry.RetryContext;
 import com.nurkiewicz.asyncretry.RetryExecutor;
 import com.nurkiewicz.asyncretry.function.RetryRunnable;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axis2.builder.Builder;
+import org.apache.axis2.builder.BuilderUtil;
+import org.apache.axis2.builder.SOAPBuilder;
+import org.apache.axis2.transport.TransportUtils;
+import org.apache.commons.io.input.AutoCloseInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.base.SequenceMediator;
 import org.jsmpp.bean.AlertNotification;
 import org.jsmpp.bean.BindType;
 import org.jsmpp.bean.DataSm;
@@ -42,8 +52,10 @@ import org.jsmpp.session.MessageReceiverListener;
 import org.jsmpp.session.SMPPSession;
 import org.jsmpp.session.Session;
 import org.jsmpp.session.SessionStateListener;
+import org.jsmpp.util.InvalidDeliveryReceiptException;
 import org.wso2.carbon.inbound.endpoint.protocol.generic.GenericEventBasedConsumer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Properties;
@@ -350,7 +362,32 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     private class MessageReceiverListenerImpl implements MessageReceiverListener {
         public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
             // inject short message into the sequence.
-            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstants.CONTENT_TYPE);
+            MessageContext msgCtx;
+            msgCtx = createMessageContext();
+            msgCtx.setProperty("SMPP_MessageId", deliverSm.getSmDefaultMsgId());
+            msgCtx.setProperty("SMPP_SourceAddress", deliverSm.getSourceAddr());
+            msgCtx.setProperty("SMPP_DestiationAddress", deliverSm.getDestAddress());
+            msgCtx.setProperty("SMPP_DataCoding", deliverSm.getDataCoding());
+            msgCtx.setProperty("SMPP_DestinationAddressNPI", deliverSm.getDestAddrNpi());
+            msgCtx.setProperty("SMPP_DestinationAddressTON", deliverSm.getDestAddrTon());
+            msgCtx.setProperty("SMPP_ESMClass", deliverSm.getEsmClass());
+            msgCtx.setProperty("SMPP_PriorityFlag", deliverSm.getPriorityFlag());
+            msgCtx.setProperty("SMPP_ProtocolId", deliverSm.getProtocolId());
+            msgCtx.setProperty("SMPP_RegisteredDelivery", deliverSm.getRegisteredDelivery());
+            msgCtx.setProperty("SMPP_ReplaceIfPresentFlag", deliverSm.getReplaceIfPresent());
+            msgCtx.setProperty("SMPP_ScheduleDeliveryTime", deliverSm.getScheduleDeliveryTime());
+            msgCtx.setProperty("SMPP_SequenceNumber", deliverSm.getSequenceNumber());
+            msgCtx.setProperty("SMPP_ServiceType", deliverSm.getServiceType());
+            msgCtx.setProperty("SMPP_SourceAddressNPI", deliverSm.getSourceAddrNpi());
+            msgCtx.setProperty("SMPP_SourceAddressTON", deliverSm.getSourceAddrTon());
+            msgCtx.setProperty("SMPP_ValidityPeriod", deliverSm.getValidityPeriod());
+
+            try {
+                msgCtx.setProperty("ShortMessageAsDeliveryReceipt", deliverSm.getShortMessageAsDeliveryReceipt());
+            } catch (InvalidDeliveryReceiptException e) {
+                logger.error("InvalidDeliveryReceipt");
+            }
+            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstants.CONTENT_TYPE, msgCtx);
         }
 
         public void onAcceptAlertNotification(AlertNotification alertNotification) {
@@ -365,5 +402,76 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
             }
             return null;
         }
+    }
+
+    /**
+     * Inject the message into the sequence.
+     */
+    private boolean injectMessage(String strMessage, String contentType, MessageContext msgCtx) {
+        AutoCloseInputStream in = new AutoCloseInputStream(new ByteArrayInputStream(strMessage.getBytes()));
+
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Processed Custom inbound EP Message of Content-type : " + contentType + " for " + name);
+            }
+
+            org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) msgCtx).getAxis2MessageContext();
+            Object builder;
+            if (StringUtils.isEmpty(contentType)) {
+                logger.debug("No content type specified. Using SOAP builder for " + name);
+                builder = new SOAPBuilder();
+            } else {
+                int index = contentType.indexOf(59);
+                String type = index > 0 ? contentType.substring(0, index) : contentType;
+                builder = BuilderUtil.getBuilderFromSelector(type, axis2MsgCtx);
+                if (builder == null) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No message builder found for type \'" + type + "\'. Falling back to SOAP." + name);
+                    }
+
+                    builder = new SOAPBuilder();
+                }
+            }
+
+            OMElement documentElement = ((Builder) builder).processDocument(in, contentType, axis2MsgCtx);
+            msgCtx.setEnvelope(TransportUtils.createSOAPEnvelope(documentElement));
+            if (this.injectingSeq == null || "".equals(this.injectingSeq)) {
+                logger.error("Sequence name not specified. Sequence : " + this.injectingSeq);
+                return false;
+            }
+
+            SequenceMediator seq = (SequenceMediator) this.synapseEnvironment.getSynapseConfiguration().getSequence(this.injectingSeq);
+            if (seq != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("injecting message to sequence : " + this.injectingSeq);
+                }
+
+                seq.setErrorHandler(this.onErrorSeq);
+                if (!seq.isInitialized()) {
+                    seq.init(this.synapseEnvironment);
+                }
+
+                if (!this.synapseEnvironment.injectInbound(msgCtx, seq, this.sequential)) {
+                    return false;
+                }
+            } else {
+                logger.error("Sequence: " + this.injectingSeq + " not found" + name);
+            }
+        } catch (Exception e) {
+            throw new SynapseException("Error while processing the Amazon SQS Message ", e);
+        }
+
+        return true;
+    }
+
+    /**
+     * Create the message context.
+     */
+    private MessageContext createMessageContext() {
+        MessageContext msgCtx = this.synapseEnvironment.createMessageContext();
+        org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) msgCtx).getAxis2MessageContext();
+        axis2MsgCtx.setServerSide(true);
+        axis2MsgCtx.setMessageID(UUIDGenerator.getUUID());
+        return msgCtx;
     }
 }

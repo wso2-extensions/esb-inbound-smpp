@@ -173,6 +173,8 @@ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
                             com.nurkiewicz.asyncretry.*,
                             org.apache.synapse.*,
                             org.apache.commons.*,
+                            org.apache.axis2.*,
+                            org.apache.axiom.*,
                         </Import-Package>
                     </instructions>
                 </configuration>
