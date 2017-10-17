@@ -148,7 +148,6 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * An object that executes submitted Runnable tasks.
      */
     private RetryExecutor executor;
-    private MessageContext msgCtx;
 
     public SMPPListeningConsumer(Properties smppProperties, String name,
                                  SynapseEnvironment synapseEnvironment, String injectingSeq,
@@ -363,31 +362,32 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     private class MessageReceiverListenerImpl implements MessageReceiverListener {
         public void onAcceptDeliverSm(DeliverSm deliverSm) throws ProcessRequestException {
             // inject short message into the sequence.
+            MessageContext msgCtx;
             msgCtx = createMessageContext();
-            msgCtx.setProperty("MessageId", deliverSm.getSmDefaultMsgId());
-            msgCtx.setProperty("SourceAddress", deliverSm.getSourceAddr());
-            msgCtx.setProperty("DestiationAddress", deliverSm.getDestAddress());
-            msgCtx.setProperty("DataCoding", deliverSm.getDataCoding());
-            msgCtx.setProperty("DestinationAddressNPI", deliverSm.getDestAddrNpi());
-            msgCtx.setProperty("DestinationAddressTON", deliverSm.getDestAddrTon());
-            msgCtx.setProperty("ESMClass", deliverSm.getEsmClass());
-            msgCtx.setProperty("PriorityFlag", deliverSm.getPriorityFlag());
-            msgCtx.setProperty("ProtocolId", deliverSm.getProtocolId());
-            msgCtx.setProperty("RegisteredDelivery", deliverSm.getRegisteredDelivery());
-            msgCtx.setProperty("ReplaceIfPresentFlag", deliverSm.getReplaceIfPresent());
-            msgCtx.setProperty("ScheduleDeliveryTime", deliverSm.getScheduleDeliveryTime());
-            msgCtx.setProperty("SequenceNumber", deliverSm.getSequenceNumber());
-            msgCtx.setProperty("ServiceType", deliverSm.getServiceType());
-            msgCtx.setProperty("SourceAddressNPI", deliverSm.getSourceAddrNpi());
-            msgCtx.setProperty("SourceAddressTON", deliverSm.getSourceAddrTon());
-            msgCtx.setProperty("ValidityPeriod", deliverSm.getValidityPeriod());
+            msgCtx.setProperty("SMPP_MessageId", deliverSm.getSmDefaultMsgId());
+            msgCtx.setProperty("SMPP_SourceAddress", deliverSm.getSourceAddr());
+            msgCtx.setProperty("SMPP_DestiationAddress", deliverSm.getDestAddress());
+            msgCtx.setProperty("SMPP_DataCoding", deliverSm.getDataCoding());
+            msgCtx.setProperty("SMPP_DestinationAddressNPI", deliverSm.getDestAddrNpi());
+            msgCtx.setProperty("SMPP_DestinationAddressTON", deliverSm.getDestAddrTon());
+            msgCtx.setProperty("SMPP_ESMClass", deliverSm.getEsmClass());
+            msgCtx.setProperty("SMPP_PriorityFlag", deliverSm.getPriorityFlag());
+            msgCtx.setProperty("SMPP_ProtocolId", deliverSm.getProtocolId());
+            msgCtx.setProperty("SMPP_RegisteredDelivery", deliverSm.getRegisteredDelivery());
+            msgCtx.setProperty("SMPP_ReplaceIfPresentFlag", deliverSm.getReplaceIfPresent());
+            msgCtx.setProperty("SMPP_ScheduleDeliveryTime", deliverSm.getScheduleDeliveryTime());
+            msgCtx.setProperty("SMPP_SequenceNumber", deliverSm.getSequenceNumber());
+            msgCtx.setProperty("SMPP_ServiceType", deliverSm.getServiceType());
+            msgCtx.setProperty("SMPP_SourceAddressNPI", deliverSm.getSourceAddrNpi());
+            msgCtx.setProperty("SMPP_SourceAddressTON", deliverSm.getSourceAddrTon());
+            msgCtx.setProperty("SMPP_ValidityPeriod", deliverSm.getValidityPeriod());
 
             try {
                 msgCtx.setProperty("ShortMessageAsDeliveryReceipt", deliverSm.getShortMessageAsDeliveryReceipt());
             } catch (InvalidDeliveryReceiptException e) {
                 logger.error("InvalidDeliveryReceipt");
             }
-            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstants.CONTENT_TYPE);
+            injectMessage(new String(deliverSm.getShortMessage()), SMPPConstants.CONTENT_TYPE, msgCtx);
         }
 
         public void onAcceptAlertNotification(AlertNotification alertNotification) {
@@ -407,8 +407,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     /**
      * Inject the message into the sequence.
      */
-    @Override
-    protected boolean injectMessage(String strMessage, String contentType) {
+    private boolean injectMessage(String strMessage, String contentType, MessageContext msgCtx) {
         AutoCloseInputStream in = new AutoCloseInputStream(new ByteArrayInputStream(strMessage.getBytes()));
 
         try {
