@@ -1,0 +1,164 @@
+{
+  "name": "smppInbound",
+  "type": "inbound-connector",
+  "title": "SMPP Inbound Connector",
+  "help": "Configure the SMPP inbound connector to receive messages based on specified SMPP protocol parameters.",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "host",
+        "displayName": "Host",
+        "inputType": "string",
+        "required": "true",
+        "helpTip": "The hostname or IP address of the SMPP server."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "port",
+        "displayName": "Port",
+        "inputType": "string",
+        "required": "true",
+        "helpTip": "The port number on which the SMPP server is listening."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "systemId",
+        "displayName": "System ID",
+        "inputType": "string",
+        "required": "true",
+        "helpTip": "The system ID for authenticating with the SMPP server."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "password",
+        "displayName": "Password",
+        "inputType": "string",
+        "required": "true",
+        "helpTip": "The password for authenticating with the SMPP server."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "systemType",
+        "displayName": "System Type",
+        "inputType": "string",
+        "required": "false",
+        "helpTip": "The system type parameter to specify when binding to the SMPP server."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "addressTon",
+        "displayName": "Address TON",
+        "inputType": "string",
+        "required": "false",
+        "helpTip": "Type of Number for the source address."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "addressNpi",
+        "displayName": "Address NPI",
+        "inputType": "string",
+        "required": "false",
+        "helpTip": "Numbering Plan Indicator for the source address."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "bindType",
+        "displayName": "Bind Type",
+        "inputType": "string",
+        "required": "true",
+        "helpTip": "The type of SMPP bind operation (e.g., transmitter, receiver, or transceiver)."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "addressRange",
+        "displayName": "Address Range",
+        "inputType": "string",
+        "required": "false",
+        "helpTip": "The range of addresses to which the SMPP session is applicable."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "enquireLinkTimer",
+        "displayName": "Enquire Link Timer",
+        "inputType": "string",
+        "defaultValue": "10000",
+        "required": "true",
+        "helpTip": "Interval in milliseconds for sending enquire_link to keep the session active."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "transactionTimer",
+        "displayName": "Transaction Timer",
+        "inputType": "string",
+        "defaultValue": "200",
+        "required": "true",
+        "helpTip": "Maximum time in milliseconds to await a response for a transaction."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "reconnectInterval",
+        "displayName": "Reconnect Interval",
+        "inputType": "string",
+        "defaultValue": "1000",
+        "required": "true",
+        "helpTip": "Interval in milliseconds to wait before attempting to reconnect after a connection loss."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "retryCount",
+        "displayName": "Retry Count",
+        "inputType": "string",
+        "defaultValue": "3",
+        "required": "true",
+        "helpTip": "Number of times to retry connecting after an initial failure."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "exponentialFactor",
+        "displayName": "Exponential Backoff Factor",
+        "inputType": "string",
+        "defaultValue": "5",
+        "required": "true",
+        "helpTip": "Factor by which the backoff time is incremented after each retry."
+      }
+    },
+    {
+      "type": "attribute",
+      "value": {
+        "name": "maximumBackoffTime",
+        "displayName": "Maximum Backoff Time",
+        "inputType": "string",
+        "defaultValue": "10000",
+        "required": "true",
+        "helpTip": "Maximum time in milliseconds to back off to when retrying after successive failures."
+      }
+    }
+  ]
+}
