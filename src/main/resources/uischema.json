@@ -1,163 +1,327 @@
 {
+  "id": "org.wso2.carbon.inbound.smpp.SMPPListeningConsumer",
   "name": "smppInbound",
   "type": "inbound-connector",
   "title": "SMPP Inbound Connector",
   "help": "Configure the SMPP inbound connector to receive messages based on specified SMPP protocol parameters.",
   "elements": [
     {
-      "type": "attribute",
+      "type": "attributeGroup",
       "value": {
-        "name": "host",
-        "displayName": "Host",
-        "inputType": "string",
-        "required": "true",
-        "helpTip": "The hostname or IP address of the SMPP server."
+        "groupName": "Generic",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "name",
+              "displayName": "Inbound Endpoint Name",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "Unique identifier for the SMPP inbound endpoint."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "class",
+              "displayName": "Class Name",
+              "inputType": "string",
+              "required": "true",
+              "hidden": true,
+              "defaultValue": "org.wso2.carbon.inbound.smpp.SMPPListeningConsumer"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "sequence",
+              "displayName": "Injecting Sequence Name",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "Sequence to inject the SMS message"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "onError",
+              "displayName": "Error Sequence Name",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "Error sequence to invoke on fault"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "suspend",
+              "displayName": "Suspend Inbound",
+              "inputType": "checkbox",
+              "defaultValue": false,
+              "hidden": true,
+              "required": "false",
+              "helpTip": "Suspend Inbound"
+            }
+          }
+        ]
       }
     },
     {
-      "type": "attribute",
+      "type": "attributeGroup",
       "value": {
-        "name": "port",
-        "displayName": "Port",
-        "inputType": "string",
-        "required": "true",
-        "helpTip": "The port number on which the SMPP server is listening."
+        "groupName": "Inbound Functional",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "inbound.behavior",
+              "displayName": "Inbound behavior",
+              "hidden": true,
+              "inputType": "string",
+              "defaultValue": "eventBased",
+              "required": "true",
+              "helpTip": "Inbound behavior"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "sequential",
+              "displayName": "Execute sequentially",
+              "inputType": "checkbox",
+              "defaultValue": true,
+              "required": "false",
+              "helpTip": "The behaviour when executing the given sequence."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "coordination",
+              "displayName": "Coordination",
+              "inputType": "checkbox",
+              "defaultValue": true,
+              "required": "false",
+              "helpTip": "In a clustered setup, this will run the inbound only in a single worker node."
+            }
+          }
+        ]
       }
     },
     {
-      "type": "attribute",
+      "type": "attributeGroup",
       "value": {
-        "name": "systemId",
-        "displayName": "System ID",
-        "inputType": "string",
-        "required": "true",
-        "helpTip": "The system ID for authenticating with the SMPP server."
+        "groupName": "SMSC Basic",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "host",
+              "displayName": "Host",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "IP address of the Short Message Service Center."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "port",
+              "displayName": "Port",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "Port to access the Short Message Service Center."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "systemId",
+              "displayName": "System ID",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "The username to be used to connect to the Shot Message Service Center."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "password",
+              "displayName": "Password",
+              "inputType": "string",
+              "required": "true",
+              "helpTip": "The password to be used to connect to the Shot Message Service Center."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "bindType",
+              "displayName": "Bind Type",
+              "inputType": "combo",
+              "required": "true",
+              "comboValues": [
+                "BIND_RX",
+                "BIND_TRX"
+              ],
+              "helpTip": "The type of bind to be used to connect to the Shot Message Service Center."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "addressTon",
+              "displayName": "Address TON",
+              "inputType": "combo",
+              "required": "true",
+              "comboValues": [
+                "UNKNOWN",
+                "INTERNATIONAL",
+                "NATIONAL",
+                "NETWORK_SPECIFIC",
+                "SUBSCRIBER_NUMBER",
+                "ALPHANUMERIC",
+                "ABBREVIATED"
+              ],
+              "helpTip": "Format of the addressing (bind addressing) that will be processed for inbound messages."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "addressNpi",
+              "displayName": "Address NPI",
+              "inputType": "combo",
+              "required": "true",
+              "comboValues": [
+                "UNKNOWN",
+                "ISDN",
+                "DATA",
+                "TELEX",
+                "LAND_MOBILE",
+                "NATIONAL",
+                "PRIVATE",
+                "ERMES",
+                "INTERNET",
+                "WAP"
+              ],
+              "helpTip": "Numbering plan associated with the Short Message Service Center."
+            }
+          }
+        ]
       }
     },
     {
-      "type": "attribute",
+      "type": "attributeGroup",
       "value": {
-        "name": "password",
-        "displayName": "Password",
-        "inputType": "string",
-        "required": "true",
-        "helpTip": "The password for authenticating with the SMPP server."
+        "groupName": "SMSC Advanced",
+        "isCollapsed": true,
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "systemType",
+              "displayName": "System Type",
+              "inputType": "combo",
+              "required": "false",
+              "comboValues": [
+                "CMT",
+                "CPT",
+                "VMN",
+                "VMA",
+                "WAP",
+                "USSD",
+                "null"
+              ],
+              "helpTip": "Identifies the type of ESME system requesting to bind as a receiver with the SMSC."
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "addressRange",
+              "displayName": "Address Range",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "A single ESME address or a range of ESME addresses served via this SMPP receiver session."
+            }
+          }
+        ]
       }
     },
     {
-      "type": "attribute",
+      "type": "attributeGroup",
       "value": {
-        "name": "systemType",
-        "displayName": "System Type",
-        "inputType": "string",
-        "required": "false",
-        "helpTip": "The system type parameter to specify when binding to the SMPP server."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "addressTon",
-        "displayName": "Address TON",
-        "inputType": "string",
-        "required": "false",
-        "helpTip": "Type of Number for the source address."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "addressNpi",
-        "displayName": "Address NPI",
-        "inputType": "string",
-        "required": "false",
-        "helpTip": "Numbering Plan Indicator for the source address."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "bindType",
-        "displayName": "Bind Type",
-        "inputType": "string",
-        "required": "true",
-        "helpTip": "The type of SMPP bind operation (e.g., transmitter, receiver, or transceiver)."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "addressRange",
-        "displayName": "Address Range",
-        "inputType": "string",
-        "required": "false",
-        "helpTip": "The range of addresses to which the SMPP session is applicable."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "enquireLinkTimer",
-        "displayName": "Enquire Link Timer",
-        "inputType": "string",
-        "defaultValue": "10000",
-        "required": "true",
-        "helpTip": "Interval in milliseconds for sending enquire_link to keep the session active."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "transactionTimer",
-        "displayName": "Transaction Timer",
-        "inputType": "string",
-        "defaultValue": "200",
-        "required": "true",
-        "helpTip": "Maximum time in milliseconds to await a response for a transaction."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "reconnectInterval",
-        "displayName": "Reconnect Interval",
-        "inputType": "string",
-        "defaultValue": "1000",
-        "required": "true",
-        "helpTip": "Interval in milliseconds to wait before attempting to reconnect after a connection loss."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "retryCount",
-        "displayName": "Retry Count",
-        "inputType": "string",
-        "defaultValue": "3",
-        "required": "true",
-        "helpTip": "Number of times to retry connecting after an initial failure."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "exponentialFactor",
-        "displayName": "Exponential Backoff Factor",
-        "inputType": "string",
-        "defaultValue": "5",
-        "required": "true",
-        "helpTip": "Factor by which the backoff time is incremented after each retry."
-      }
-    },
-    {
-      "type": "attribute",
-      "value": {
-        "name": "maximumBackoffTime",
-        "displayName": "Maximum Backoff Time",
-        "inputType": "string",
-        "defaultValue": "10000",
-        "required": "true",
-        "helpTip": "Maximum time in milliseconds to back off to when retrying after successive failures."
+        "groupName": "SMSC Timeout",
+        "isCollapsed": true,
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "enquireLinkTimer",
+              "displayName": "Enquire Link Timer (ms)",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "Used to check the connectivity between the SMPP inbound and SMSC",
+              "defaultValue": "10000"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "transactionTimer",
+              "displayName": "Transaction Timer (ms)",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "Time elapsed between SMPP request and the corresponding response.",
+              "defaultValue": "200"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "reconnectInterval",
+              "displayName": "Reconnect Interval (ms)",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "The Initial retry interval to reconnect with the SMSC.",
+              "defaultValue": "1000"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "retryCount",
+              "displayName": "Retry Count",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "The number of times to retry to connect with SMSC. For infinite retries, set this value to -1.",
+              "defaultValue": "3"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "exponentialFactor",
+              "displayName": "Exponential Backoff Factor",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "If the initial retry attempt fails, we should wait (reconnectInterval * exponentialFactor) times more.",
+              "defaultValue": "5"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
+              "name": "maximumBackoffTime",
+              "displayName": "Maximum Backoff Time (ms)",
+              "inputType": "string",
+              "required": "false",
+              "helpTip": "The maximum backoff time to wait before retrying to connect with the SMSC.",
+              "defaultValue": "10000"
+            }
+          }
+        ]
       }
     }
   ]
