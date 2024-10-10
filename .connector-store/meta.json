@@ -2,7 +2,7 @@
     "name": "SMPP (Inbound)",
     "owner": "WSO2",
     "category": "Developer Tools",
-    "documentationUrl": "https://ei.docs.wso2.com/en/latest/micro-integrator/references/connectors/smpp-connector/smpp-connector-overview/",
+    "documentationUrl": "https://mi.docs.wso2.com/en/latest/reference/connectors/smpp-connector/smpp-inbound-endpoint-config/",
     "description": "SMPP Inbound allows you to receive SMS through the WSO2 EI. jsmpp is a java implementation of SMPP. protocol.",
     "status": "Active",
     "labels": [
