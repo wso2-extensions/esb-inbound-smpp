@@ -1,9 +1,9 @@
 {
   "id": "org.wso2.carbon.inbound.smpp.SMPPListeningConsumer",
   "name": "smppInbound",
-  "type": "inbound-connector",
-  "title": "SMPP Inbound Connector",
-  "help": "Configure the SMPP inbound connector to receive messages based on specified SMPP protocol parameters.",
+  "type": "event-integration",
+  "title": "SMPP",
+  "help": "Configure SMPP to receive messages based on specified SMPP protocol parameters.",
   "elements": [
     {
       "type": "attributeGroup",
@@ -14,10 +14,10 @@
             "type": "attribute",
             "value": {
               "name": "name",
-              "displayName": "Inbound Endpoint Name",
+              "displayName": "Event Integration Name",
               "inputType": "string",
               "required": "true",
-              "helpTip": "Unique identifier for the SMPP inbound endpoint."
+              "helpTip": "Unique identifier for the SMPP event integration."
             }
           },
           {
@@ -34,10 +34,22 @@
           {
             "type": "attribute",
             "value": {
+              "name": "generateSequences",
+              "displayName": "Automatically generate sequences",
+              "inputType": "checkbox",
+              "defaultValue": true,
+              "required": "true"
+            }
+          },
+          {
+            "type": "attribute",
+            "value": {
               "name": "sequence",
               "displayName": "Injecting Sequence Name",
-              "inputType": "string",
+              "inputType": "keyOrExpression",
+              "keyType": "sequence",
               "required": "true",
+              "enableCondition": [{"generateSequences":false}],
               "helpTip": "Sequence to inject the SMS message"
             }
           },
@@ -46,8 +58,10 @@
             "value": {
               "name": "onError",
               "displayName": "Error Sequence Name",
-              "inputType": "string",
+              "inputType": "keyOrExpression",
+              "keyType": "sequence",
               "required": "true",
+              "enableCondition": [{"generateSequences":false}],
               "helpTip": "Error sequence to invoke on fault"
             }
           },
