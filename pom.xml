@@ -20,7 +20,7 @@ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.integration.inbound</groupId>
     <artifactId>mi-inbound-smpp</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>SMPP Listening Consumer</name>
     <url>http://wso2.org</url>
     <packaging>bundle</packaging>
