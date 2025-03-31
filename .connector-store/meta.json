@@ -17,20 +17,16 @@
     ],
     "releases": [
         {
-            "tagName": "v1.0.3",
+            "tagName": "v2.0.0",
             "products": [
-                "MI 4.4.0",
-                "MI 4.3.0",
-                "MI 4.2.0",
-                "MI 4.1.0",
-                "MI 4.0.0"
+                "MI 4.4.0"
             ],
             "operations": [],
             "connections": [],
             "isHidden": false
         },
         {
-            "tagName": "org.apache.synapse.smpp.listen.class-1.0.1",
+            "tagName": "v1.0.3",
             "products": [
                 "MI 4.4.0",
                 "MI 4.3.0",

@@ -1,0 +1,13 @@
+# Connector Descriptor File
+# Specifies the dependencies and repositories required for the connector.
+
+dependencies:
+  - groupId: "com.googlecode.jsmpp"
+    artifactId: "jsmpp"
+    version: "${smpp.version}"
+  - groupId: "com.nurkiewicz.asyncretry"
+    artifactId: "asyncretry-jdk7"
+    version: "${asyncretry.version}"
+  - groupId: "org.wso2.integration.inbound"
+    artifactId: "mi-inbound-smpp"
+    version: "${smpp.inbound.version}"
