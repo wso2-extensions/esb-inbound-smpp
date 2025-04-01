@@ -133,6 +133,7 @@
               "displayName": "Host",
               "inputType": "string",
               "required": "true",
+              "defaultValue": "localhost",
               "helpTip": "IP address of the Short Message Service Center."
             }
           },
@@ -143,6 +144,7 @@
               "displayName": "Port",
               "inputType": "string",
               "required": "true",
+              "defaultValue": "2775",
               "helpTip": "Port to access the Short Message Service Center."
             }
           },
@@ -173,6 +175,7 @@
               "displayName": "Bind Type",
               "inputType": "combo",
               "required": "true",
+              "defaultValue": "BIND_RX",
               "comboValues": [
                 "BIND_RX",
                 "BIND_TRX"
@@ -187,6 +190,7 @@
               "displayName": "Address TON",
               "inputType": "combo",
               "required": "true",
+              "defaultValue": "UNKNOWN",
               "comboValues": [
                 "UNKNOWN",
                 "INTERNATIONAL",
@@ -206,6 +210,7 @@
               "displayName": "Address NPI",
               "inputType": "combo",
               "required": "true",
+              "defaultValue": "UNKNOWN",
               "comboValues": [
                 "UNKNOWN",
                 "ISDN",
