@@ -17,13 +17,188 @@
     ],
     "releases": [
         {
-            "tagName": "v2.0.0",
+            "tagName": "v2.0.1",
             "products": [
                 "MI 4.4.0"
             ],
-            "operations": [],
-            "connections": [],
-            "isHidden": false
+            "operations": [
+                {
+                    "name": "init",
+                    "description": "Initialize Kafka Inbound Endpoint",
+                    "params": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "",
+                            "description": "Unique identifier for the SMPP event integration."
+                        },
+                        {
+                            "name": "class",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "org.wso2.carbon.inbound.smpp.SMPPListeningConsumer",
+                            "description": ""
+                        },
+                        {
+                            "name": "generateSequences",
+                            "type": "checkbox",
+                            "required": false,
+                            "defaultValue": "True",
+                            "description": ""
+                        },
+                        {
+                            "name": "sequence",
+                            "type": "keyOrExpression",
+                            "required": true,
+                            "defaultValue": "",
+                            "description": "Sequence to inject the SMS message"
+                        },
+                        {
+                            "name": "onError",
+                            "type": "keyOrExpression",
+                            "required": true,
+                            "defaultValue": "",
+                            "description": "Error sequence to invoke on fault"
+                        },
+                        {
+                            "name": "suspend",
+                            "type": "checkbox",
+                            "required": false,
+                            "defaultValue": "False",
+                            "description": "Suspend Inbound"
+                        },
+                        {
+                            "name": "inbound.behavior",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "eventBased",
+                            "description": "Inbound behavior"
+                        },
+                        {
+                            "name": "sequential",
+                            "type": "checkbox",
+                            "required": false,
+                            "defaultValue": "True",
+                            "description": "The behaviour when executing the given sequence."
+                        },
+                        {
+                            "name": "coordination",
+                            "type": "checkbox",
+                            "required": false,
+                            "defaultValue": "True",
+                            "description": "In a clustered setup, this will run the inbound only in a single worker node."
+                        },
+                        {
+                            "name": "host",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "localhost",
+                            "description": "IP address of the Short Message Service Center."
+                        },
+                        {
+                            "name": "port",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "2775",
+                            "description": "Port to access the Short Message Service Center."
+                        },
+                        {
+                            "name": "systemId",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "",
+                            "description": "The username to be used to connect to the Shot Message Service Center."
+                        },
+                        {
+                            "name": "password",
+                            "type": "string",
+                            "required": true,
+                            "defaultValue": "",
+                            "description": "The password to be used to connect to the Shot Message Service Center."
+                        },
+                        {
+                            "name": "bindType",
+                            "type": "combo",
+                            "required": true,
+                            "defaultValue": "BIND_RX",
+                            "description": "The type of bind to be used to connect to the Shot Message Service Center."
+                        },
+                        {
+                            "name": "addressTon",
+                            "type": "combo",
+                            "required": true,
+                            "defaultValue": "UNKNOWN",
+                            "description": "Format of the addressing (bind addressing) that will be processed for inbound messages."
+                        },
+                        {
+                            "name": "addressNpi",
+                            "type": "combo",
+                            "required": true,
+                            "defaultValue": "UNKNOWN",
+                            "description": "Numbering plan associated with the Short Message Service Center."
+                        },
+                        {
+                            "name": "systemType",
+                            "type": "combo",
+                            "required": false,
+                            "defaultValue": "",
+                            "description": "Identifies the type of ESME system requesting to bind as a receiver with the SMSC."
+                        },
+                        {
+                            "name": "addressRange",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "",
+                            "description": "A single ESME address or a range of ESME addresses served via this SMPP receiver session."
+                        },
+                        {
+                            "name": "enquireLinkTimer",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "10000",
+                            "description": "Used to check the connectivity between the SMPP inbound and SMSC"
+                        },
+                        {
+                            "name": "transactionTimer",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "200",
+                            "description": "Time elapsed between SMPP request and the corresponding response."
+                        },
+                        {
+                            "name": "reconnectInterval",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "1000",
+                            "description": "The Initial retry interval to reconnect with the SMSC."
+                        },
+                        {
+                            "name": "retryCount",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "3",
+                            "description": "The number of times to retry to connect with SMSC. For infinite retries, set this value to -1."
+                        },
+                        {
+                            "name": "exponentialFactor",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "5",
+                            "description": "If the initial retry attempt fails, we should wait (reconnectInterval * exponentialFactor) times more."
+                        },
+                        {
+                            "name": "maximumBackoffTime",
+                            "type": "string",
+                            "required": false,
+                            "defaultValue": "10000",
+                            "description": "The maximum backoff time to wait before retrying to connect with the SMSC."
+                        }
+                    ],
+                    "isHidden": false
+                }
+            ],
+            "connections": []
         },
         {
             "tagName": "v1.0.3",
