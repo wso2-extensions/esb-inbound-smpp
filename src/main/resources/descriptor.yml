@@ -11,3 +11,7 @@ dependencies:
   - groupId: "org.wso2.integration.inbound"
     artifactId: "mi-inbound-smpp"
     version: "${smpp.inbound.version}"
+
+repositories:
+  - id: "wso2-nexus"
+    url: "https://maven.wso2.org/nexus/content/groups/wso2-public/"
