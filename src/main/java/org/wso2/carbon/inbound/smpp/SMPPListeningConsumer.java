@@ -342,8 +342,6 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * Close the connection with the SMSC and stop all the threads.
      */
     public void destroy() {
-        isShuttingDown = true;
-
         if (session != null) {
             session.unbindAndClose();
             if (logger.isDebugEnabled()) {
@@ -365,8 +363,13 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
             session = newSession();
         } catch (IOException e) {
             reconnect();
-            throw new SynapseException("Error while getting the SMPP session", e);
+            throw new SynapseException("Error while getting the SMPP session in resuming operation", e);
         }
+    }
+
+    public void pause() {
+        isShuttingDown = true;
+        destroy();
     }
 
     /**
