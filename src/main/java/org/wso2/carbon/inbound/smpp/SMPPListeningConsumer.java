@@ -342,6 +342,8 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * Close the connection with the SMSC and stop all the threads.
      */
     public void destroy() {
+        isShuttingDown = true;
+
         if (session != null) {
             session.unbindAndClose();
             if (logger.isDebugEnabled()) {
@@ -368,8 +370,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     }
 
     public void pause() {
-        isShuttingDown = true;
-        destroy();
+        logger.info("Pause operation called for inbound consumer: " + name);
     }
 
     /**
