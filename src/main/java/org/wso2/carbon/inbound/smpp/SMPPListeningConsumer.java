@@ -320,6 +320,9 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      */
     private void reconnect() {
         if (isShuttingDown || scheduler == null || scheduler.isShutdown()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipping reconnect for [" + name + "] because scheduler is in shutdown state.");
+            }
             return;
         }
 
@@ -359,6 +362,7 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     }
 
     public void resume() {
+        logger.info("Resume operation called for inbound consumer: " + name);
         isShuttingDown = false;
 
         try {
@@ -381,6 +385,9 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
         @Override
         public void onStateChange(SessionState sessionState, SessionState sessionState1, Object o) {
             if (isShuttingDown) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipping session state change handling for [" + name + "] because shutdown is in progress.");
+                }
                 return;
             }
 
