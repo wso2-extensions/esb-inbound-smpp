@@ -148,6 +148,10 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * An object that executes submitted Runnable tasks.
      */
     private RetryExecutor executor;
+    /**
+     *  The flag serves as a coordination mechanism to prevent race conditions during the shutdown process.
+     */
+    private volatile boolean isShuttingDown = false;
 
     public SMPPListeningConsumer(Properties smppProperties, String name,
                                  SynapseEnvironment synapseEnvironment, String injectingSeq,
@@ -315,18 +319,34 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
      * Reconnect session after specified interval.
      */
     private void reconnect() {
-        final ListenableFuture future = executor.doWithRetry(new RetryRunnable() {
-            @Override
-            public void run(RetryContext retryContext) throws Exception {
-                newSession();
+        if (isShuttingDown || scheduler == null || scheduler.isShutdown()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipping reconnect for [" + name + "] because scheduler is in shutdown state.");
             }
-        });
+            return;
+        }
+
+        try {
+            final ListenableFuture future = executor.doWithRetry(new RetryRunnable() {
+                @Override
+                public void run(RetryContext retryContext) throws Exception {
+                    if (isShuttingDown) {
+                        throw new InterruptedException("Shutdown requested");
+                    }
+                    newSession();
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Failed to schedule reconnection for " + name, e);
+        }
     }
 
     /**
      * Close the connection with the SMSC and stop all the threads.
      */
     public void destroy() {
+        isShuttingDown = true;
+
         if (session != null) {
             session.unbindAndClose();
             if (logger.isDebugEnabled()) {
@@ -341,6 +361,22 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
         }
     }
 
+    public void resume() {
+        logger.info("Resume operation called for inbound consumer: " + name);
+        isShuttingDown = false;
+
+        try {
+            session = newSession();
+        } catch (IOException e) {
+            reconnect();
+            throw new SynapseException("Error while getting the SMPP session in resuming operation", e);
+        }
+    }
+
+    public void pause() {
+        logger.info("Pause operation called for inbound consumer: " + name);
+    }
+
     /**
      * This class will receive the notification from {@link SMPPSession} for the
      * state changes. It will schedule to re-initialize session.
@@ -348,6 +384,13 @@ public class SMPPListeningConsumer extends GenericEventBasedConsumer {
     private class SessionStateListenerImpl implements SessionStateListener {
         @Override
         public void onStateChange(SessionState sessionState, SessionState sessionState1, Object o) {
+            if (isShuttingDown) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipping session state change handling for [" + name + "] because shutdown is in progress.");
+                }
+                return;
+            }
+
             if (sessionState.equals(SessionState.CLOSED)) {
                 logger.info("Session closed for " + name);
                 reconnect();
